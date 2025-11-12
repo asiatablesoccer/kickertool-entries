@@ -52,11 +52,6 @@
             margin-bottom: 10px;
         }
 
-        .description {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
         .filters {
             background-color: white;
             padding: 20px;
@@ -135,20 +130,13 @@
             color: white;
         }
 
-        .refresh-data {
-            background-color: var(--success);
-            color: white;
-        }
-
         button:hover {
             opacity: 0.9;
             transform: translateY(-2px);
         }
 
-        /* Horizontal panels layout */
         .panels-wrapper {
             position: relative;
-            margin-bottom: 20px;
         }
 
         .panels-container {
@@ -176,14 +164,6 @@
 
         .panels-container::-webkit-scrollbar-thumb:hover {
             background: var(--secondary);
-        }
-
-        .scroll-indicator {
-            text-align: center;
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-top: 5px;
-            display: none;
         }
 
         .panel {
@@ -215,7 +195,7 @@
             background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             color: white;
             padding: 15px 20px;
-            font-size: 1.3rem;
+            font-size: 1rem;
             font-weight: 600;
             display: flex;
             justify-content: space-between;
@@ -231,7 +211,6 @@
 
         .panel-content {
             padding: 15px 20px;
-            max-height: 400px;
             overflow-y: auto;
         }
 
@@ -259,7 +238,7 @@
             color: #6c757d;
             font-style: italic;
             padding: 40px 20px;
-            width: 100%;
+            grid-column: 1 / -1;
         }
 
         .no-entries h3 {
@@ -267,57 +246,24 @@
             font-weight: 500;
         }
 
-        .status-message {
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin: 10px 0;
-            text-align: center;
-            display: none;
-        }
-
-        .status-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
         @media (max-width: 768px) {
+            .panels-wrapper {
+                display: block;
+            }
+
             .panels-container {
-                gap: 15px;
+                display: block;
+                width: 100%;
             }
 
             .panel {
-                min-width: 280px;
+                width: 100%;
+                margin-bottom: 40px;
             }
 
             h1 {
                 font-size: 2rem;
             }
-
-            .checkbox-container {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-
-            .scroll-indicator {
-                display: block;
-            }
-        }
-
-        /* Loading animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
         }
 
         @keyframes spin {
@@ -329,10 +275,7 @@
     <div class="container">
         <header>
             <h1>Player Entries Dashboard</h1>
-            <p class="description">Select disciplines to view player entries</p>
         </header>
-
-        <div id="statusMessage" class="status-message"></div>
 
         <section class="filters">
             <h2>Filter by Discipline</h2>
@@ -342,20 +285,16 @@
             <div class="actions">
                 <button class="select-all" id="selectAllBtn">Select All</button>
                 <button class="deselect-all" id="deselectAllBtn">Deselect All</button>
-                <button class="refresh-data" id="refreshDataBtn">Refresh Data</button>
             </div>
         </section>
 
         <div class="panels-wrapper">
-            <div class="panels-container" id="panelsContainer">
+            <section class="panels-container" id="panelsContainer">
                 <div class="no-entries" id="noEntriesMessage">
                     <h3>No disciplines selected</h3>
                     <p>Please select at least one discipline to view player entries.</p>
                 </div>
-            </div>
-            <div class="scroll-indicator" id="scrollIndicator">
-                ← Scroll horizontally to see more panels →
-            </div>
+            </section>
         </div>
     </div>
 
@@ -367,13 +306,9 @@
             const noEntriesMessage = document.getElementById('noEntriesMessage');
             const selectAllBtn = document.getElementById('selectAllBtn');
             const deselectAllBtn = document.getElementById('deselectAllBtn');
-            const refreshDataBtn = document.getElementById('refreshDataBtn');
             const statusMessage = document.getElementById('statusMessage');
-            const scrollIndicator = document.getElementById('scrollIndicator');
 
             let disciplinesData = {};
-
-            // Load initial data
             loadDataFromServer();
 
             // Select All button
@@ -392,89 +327,25 @@
                 updatePanels();
             });
 
-            // Refresh Data button
-            refreshDataBtn.addEventListener('click', function() {
-                loadDataFromServer();
-            });
-
-            // Check if horizontal scrolling is needed and show indicator
-            function checkScrollNeeded() {
-                if (panelsContainer.scrollWidth > panelsContainer.clientWidth) {
-                    scrollIndicator.style.display = 'block';
-                } else {
-                    scrollIndicator.style.display = 'none';
-                }
-            }
-
-            // Function to load data from server
             function loadDataFromServer() {
-                showStatus('Loading data from server...', 'success');
-                refreshDataBtn.innerHTML = '<span class="loading"></span> Refreshing...';
-                refreshDataBtn.disabled = true;
-
-                // In a real application, this would fetch from your Gin server
-                // For now, we'll use setTimeout to simulate API call
-                setTimeout(() => {
-                    disciplinesData = {
-                        "Football": [
-                            "Lionel Messi", "Cristiano Ronaldo", "Neymar Jr", "Kylian Mbappé",
-                            "Robert Lewandowski", "Kevin De Bruyne", "Virgil van Dijk", "Mohamed Salah",
-                            "Erling Haaland", "Karim Benzema"
-                        ],
-                        "Basketball": [
-                            "LeBron James", "Stephen Curry", "Kevin Durant", "Giannis Antetokounmpo",
-                            "Luka Dončić", "James Harden", "Kawhi Leonard", "Anthony Davis",
-                            "Jayson Tatum", "Joel Embiid"
-                        ],
-                        "Tennis": [
-                            "Novak Djokovic", "Rafael Nadal", "Roger Federer", "Serena Williams",
-                            "Naomi Osaka", "Ashleigh Barty", "Daniil Medvedev", "Stefanos Tsitsipas",
-                            "Iga Świątek", "Carlos Alcaraz"
-                        ],
-                        "Swimming": [
-                            "Michael Phelps", "Katie Ledecky", "Caeleb Dressel", "Adam Peaty",
-                            "Sarah Sjöström", "Ariarne Titmus", "Emma McKeon", "Kliment Kolesnikov",
-                            "Kaylee McKeown", "Adam Peaty"
-                        ],
-                        "Athletics": [
-                            "Usain Bolt", "Allyson Felix", "Eliud Kipchoge", "Shelly-Ann Fraser-Pryce",
-                            "Karsten Warholm", "Sydney McLaughlin", "Mondo Duplantis", "Yulimar Rojas",
-                            "Elaine Thompson-Herah", "Noah Lyles"
-                        ],
-                        "Gymnastics": [
-                            "Simone Biles", "Kohei Uchimura", "Nina Derwael", "Artur Dalaloyan",
-                            "Sunisa Lee", "Angelina Melnikova", "Brody Malone", "Rebeca Andrade",
-                            "Giarnni Regini-Moran", "Jake Jarman"
-                        ],
-                        "Cycling": [
-                            "Chris Froome", "Annemiek van Vleuten", "Tadej Pogačar", "Marianne Vos",
-                            "Primož Roglič", "Wout van Aert", "Mathieu van der Poel", "Julian Alaphilippe",
-                            "Tom Pidcock", "Demi Vollering"
-                        ],
-                        "Boxing": [
-                            "Manny Pacquiao", "Canelo Álvarez", "Tyson Fury", "Katie Taylor",
-                            "Vasyl Lomachenko", "Terence Crawford", "Naoya Inoue", "Oleksandr Usyk",
-                            "Shakur Stevenson", "Claressa Shields"
-                        ],
-                        "Cricket": [
-                            "Virat Kohli", "Steve Smith", "Kane Williamson", "Joe Root",
-                            "Babar Azam", "Ben Stokes", "Jasprit Bumrah", "Pat Cummins",
-                            "Rohit Sharma", "David Warner"
-                        ],
-                        "Baseball": [
-                            "Mike Trout", "Shohei Ohtani", "Aaron Judge", "Mookie Betts",
-                            "Jacob deGrom", "Fernando Tatis Jr.", "Juan Soto", "Bryce Harper",
-                            "Ronald Acuña Jr.", "José Altuve"
-                        ]
-                    };
-
-                    populateCheckboxes();
-                    updatePanels();
-                    showStatus('Data loaded successfully!', 'success');
-
-                    refreshDataBtn.innerHTML = 'Refresh Data';
-                    refreshDataBtn.disabled = false;
-                }, 800);
+                let tournamentID = 'tio:RGS80NCTI5Suv';
+                fetch(`/.netlify/functions/tournamentEntries?tournamentID=${tournamentID}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        disciplinesData = data.disciplines;
+                        populateCheckboxes();
+                        updatePanels();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    })
+                    .finally(() => {
+                    });
             }
 
             // Populate checkboxes based on disciplines data
@@ -514,7 +385,6 @@
                 if (selectedDisciplines.length === 0) {
                     panelsContainer.appendChild(noEntriesMessage);
                     noEntriesMessage.style.display = 'block';
-                    scrollIndicator.style.display = 'none';
                     return;
                 }
 
@@ -547,7 +417,7 @@
                     disciplinesData[discipline].forEach(player => {
                         const entry = document.createElement('div');
                         entry.className = 'entry';
-                        entry.textContent = player;
+                        entry.textContent = player.name;
                         panelContent.appendChild(entry);
                     });
 
@@ -555,21 +425,9 @@
                     panel.appendChild(panelContent);
                     panelsContainer.appendChild(panel);
                 });
-
-                // Check if we need to show the scroll indicator
-                setTimeout(checkScrollNeeded, 100);
             }
 
-            // Show status message
-            function showStatus(message, type) {
-                statusMessage.textContent = message;
-                statusMessage.className = `status-message status-${type}`;
-                statusMessage.style.display = 'block';
-
-                setTimeout(() => {
-                    statusMessage.style.display = 'none';
-                }, 3000);
-            }
+            populateCheckboxes();
         });
     </script>
 </body>

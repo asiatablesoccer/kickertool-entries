@@ -299,7 +299,6 @@
     </div>
 
     <script>
-        let disciplinesData = {{.disciplines}};
         // Initialize the dashboard
         document.addEventListener('DOMContentLoaded', function() {
             const filtersContainer = document.getElementById('disciplineFilters');
@@ -308,6 +307,9 @@
             const selectAllBtn = document.getElementById('selectAllBtn');
             const deselectAllBtn = document.getElementById('deselectAllBtn');
             const statusMessage = document.getElementById('statusMessage');
+
+            let disciplinesData = {};
+            loadDataFromServer();
 
             // Select All button
             selectAllBtn.addEventListener('click', function() {
@@ -324,6 +326,27 @@
                 });
                 updatePanels();
             });
+
+            function loadDataFromServer() {
+                let tournamentID = 'tio:RGS80NCTI5Suv';
+                fetch(`/api/tournamentEntries?tournamentID=${tournamentID}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        disciplinesData = data.disciplines;
+                        populateCheckboxes();
+                        updatePanels();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    })
+                    .finally(() => {
+                    });
+            }
 
             // Populate checkboxes based on disciplines data
             function populateCheckboxes() {

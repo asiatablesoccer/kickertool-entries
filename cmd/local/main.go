@@ -16,7 +16,12 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	api := kickertool.New(os.Getenv("KICKERTOOL_ACCESS_TOKEN")) // TODO: dotenv
+	api := kickertool.New(os.Getenv("KICKERTOOL_ACCESS_TOKEN"))
+
+	r.LoadHTMLGlob("templates/*")
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "dashboard.tmpl", nil)
+	})
 
 	r.GET("/api/tournamentEntries", func(c *gin.Context) {
 		tournamentID := c.Query("tournamentID")
