@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Entries Dashboard</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4bb543;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .filters {
+            background-color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+        }
+
+        .filters h2 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filters h2::before {
+            content: "⏷";
+            font-size: 1.5rem;
+        }
+
+        .checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .checkbox-item:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .checkbox-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            font-size: 1rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .select-all {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .deselect-all {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .panels-wrapper {
+            position: relative;
+        }
+
+        .panels-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 10px 5px 20px 5px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .panels-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .panels-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .panels-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .panels-container::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            min-width: 300px;
+            flex-shrink: 0;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 15px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-count {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .panel-content {
+            padding: 15px 20px;
+            overflow-y: auto;
+        }
+
+        .entry {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .entry:last-child {
+            border-bottom: none;
+        }
+
+        .entry::before {
+            content: "•";
+            color: var(--accent);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .no-entries {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 40px 20px;
+            grid-column: 1 / -1;
+        }
+
+        .no-entries h3 {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .panels-wrapper {
+                display: block;
+            }
+
+            .panels-container {
+                display: block;
+                width: 100%;
+            }
+
+            .panel {
+                width: 100%;
+                margin-bottom: 40px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Player Entries Dashboard</h1>
+        </header>
+
+        <section class="filters">
+            <h2>Filter by Discipline</h2>
+            <div class="checkbox-container" id="disciplineFilters">
+                <!-- Checkboxes will be populated by JavaScript -->
+            </div>
+            <div class="actions">
+                <button class="select-all" id="selectAllBtn">Select All</button>
+                <button class="deselect-all" id="deselectAllBtn">Deselect All</button>
+            </div>
+        </section>
+
+        <div class="panels-wrapper">
+            <section class="panels-container" id="panelsContainer">
+                <div class="no-entries" id="noEntriesMessage">
+                    <h3>No disciplines selected</h3>
+                    <p>Please select at least one discipline to view player entries.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        let disciplinesData = {{.disciplines}};
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            const filtersContainer = document.getElementById('disciplineFilters');
+            const panelsContainer = document.getElementById('panelsContainer');
+            const noEntriesMessage = document.getElementById('noEntriesMessage');
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const deselectAllBtn = document.getElementById('deselectAllBtn');
+            const statusMessage = document.getElementById('statusMessage');
+
+            // Select All button
+            selectAllBtn.addEventListener('click', function() {
+                document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                updatePanels();
+            });
+
+            // Deselect All button
+            deselectAllBtn.addEventListener('click', function() {
+                document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                updatePanels();
+            });
+
+            // Populate checkboxes based on disciplines data
+            function populateCheckboxes() {
+                filtersContainer.innerHTML = '';
+
+                Object.keys(disciplinesData).forEach(discipline => {
+                    const checkboxItem = document.createElement('div');
+                    checkboxItem.className = 'checkbox-item';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = discipline;
+                    checkbox.value = discipline;
+                    checkbox.addEventListener('change', updatePanels);
+
+                    const label = document.createElement('label');
+                    label.htmlFor = discipline;
+                    label.textContent = discipline;
+
+                    checkboxItem.appendChild(checkbox);
+                    checkboxItem.appendChild(label);
+                    filtersContainer.appendChild(checkboxItem);
+                });
+            }
+
+            // Function to update panels based on selected disciplines
+            function updatePanels() {
+                // Clear existing panels
+                panelsContainer.innerHTML = '';
+
+                // Get selected disciplines
+                const selectedDisciplines = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(checkbox => checkbox.value);
+
+                // Show message if no disciplines selected
+                if (selectedDisciplines.length === 0) {
+                    panelsContainer.appendChild(noEntriesMessage);
+                    noEntriesMessage.style.display = 'block';
+                    return;
+                }
+
+                noEntriesMessage.style.display = 'none';
+
+                // Create panels for selected disciplines
+                selectedDisciplines.forEach(discipline => {
+                    if (!disciplinesData[discipline]) return;
+
+                    const panel = document.createElement('div');
+                    panel.className = 'panel';
+
+                    const panelHeader = document.createElement('div');
+                    panelHeader.className = 'panel-header';
+
+                    const disciplineTitle = document.createElement('span');
+                    disciplineTitle.textContent = discipline;
+
+                    const playerCount = document.createElement('span');
+                    playerCount.className = 'player-count';
+                    playerCount.textContent = `${disciplinesData[discipline].length} players`;
+
+                    panelHeader.appendChild(disciplineTitle);
+                    panelHeader.appendChild(playerCount);
+
+                    const panelContent = document.createElement('div');
+                    panelContent.className = 'panel-content';
+
+                    // Add entries to the panel
+                    disciplinesData[discipline].forEach(player => {
+                        const entry = document.createElement('div');
+                        entry.className = 'entry';
+                        entry.textContent = player.name;
+                        panelContent.appendChild(entry);
+                    });
+
+                    panel.appendChild(panelHeader);
+                    panel.appendChild(panelContent);
+                    panelsContainer.appendChild(panel);
+                });
+            }
+
+            populateCheckboxes();
+        });
+    </script>
+</body>
+</html>
